@@ -1,0 +1,33 @@
+<!--
+/**
+ * Order failures notifications
+ *
+ * @copyright 2019 creativestyle
+ */
+-->
+<!--@subject {{trans "Order failure in %store_name" store_name=$store.getFrontendName()}} @-->
+<!--@vars {
+"var quote":"Quote",
+"var order":"Order",
+"var exception.getMessage()":"Exception message"
+"var exception.getTraceAsString()|raw":"Exception stack trace"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<h2>{{trans "Order data"}}</h2>
+<pre>
+    {{var order.debug()|raw}}
+</pre>
+
+<h2>{{trans "Quote data"}}</h2>
+<pre>
+    {{var quote.debug()|raw}}
+</pre>
+
+<h2>{{var exception.getMessage()}}</h2>
+<pre>
+    {{var exception.getTraceAsString()|raw}}
+</pre>
+
+{{template config_path="design/email/footer_template"}}
