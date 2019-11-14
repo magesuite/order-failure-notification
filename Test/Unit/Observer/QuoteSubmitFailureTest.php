@@ -1,9 +1,4 @@
 <?php
-/**
- * Order failures notifications
- *
- * @copyright 2019 creativestyle
- */
 
 namespace MageSuite\OrderFailureNotification\Test\Unit\Observer;
 
