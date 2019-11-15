@@ -2,52 +2,94 @@
 
 namespace MageSuite\OrderFailureNotification\Test\Unit\Observer;
 
-use \MageSuite\OrderFailureNotification\Observer\QuoteSubmitFailure;
-
 class QuoteSubmitFailureTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var QuoteSubmitFailure
+     * @var \MageSuite\OrderFailureNotification\Observer\QuoteSubmitFailure
      */
-    private $instance;
+    protected $instance;
+
+    /**
+     * @var \MageSuite\OrderFailureNotification\Service\ConfigProviderInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
+    protected $configMock;
+
+    /**
+     * @var \MageSuite\OrderFailureNotification\Service\NotificationInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
+    protected $notificationMock;
 
     protected function setUp()
     {
-        /** @var \Magento\Framework\Mail\Template\TransportBuilder|\PHPUnit\Framework\MockObject\MockObject $transportBuilderMock */
-        $transportBuilderMock = $this->getMockBuilder(\Magento\Framework\Mail\Template\TransportBuilder::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->configMock = $this->getMockBuilder(
+            \MageSuite\OrderFailureNotification\Service\ConfigProviderInterface::class
+        )->getMock();
 
-        /** @var \Magento\Framework\App\Config\ScopeConfigInterface|\PHPUnit\Framework\MockObject\MockObject $scopeConfigMock */
-        $scopeConfigMock = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->notificationMock = $this->getMockBuilder(
+            \MageSuite\OrderFailureNotification\Service\NotificationInterface::class
+        )->getMock();
 
-        /** @var \Magento\Store\Model\StoreManagerInterface|\PHPUnit\Framework\MockObject\MockObject $storeManagerMock */
-        $storeManagerMock = $this->getMockBuilder(\Magento\Store\Model\StoreManagerInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        /** @var \Psr\Log\LoggerInterface|\PHPUnit\Framework\MockObject\MockObject $loggerMock */
-        $loggerMock = $this->getMockBuilder(\Psr\Log\LoggerInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->instance = new QuoteSubmitFailure(
-            $transportBuilderMock,
-            $scopeConfigMock,
-            $storeManagerMock,
-            $loggerMock
+        $this->instance = new \MageSuite\OrderFailureNotification\Observer\QuoteSubmitFailure(
+            $this->configMock,
+            $this->notificationMock
         );
+    }
+
+    /**
+     * @return \Magento\Framework\Event\Observer|\PHPUnit\Framework\MockObject\MockObject
+     */
+    protected function getObserverMock()
+    {
+        $eventMock = $this->getMockBuilder(\Magento\Framework\Event::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $eventMock->method('__call')
+            ->willReturn(new \stdClass());
+
+        $observerMock = $this->getMockBuilder(\Magento\Framework\Event\Observer::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $observerMock->method('getEvent')
+            ->willReturn($eventMock);
+
+        return $observerMock;
     }
 
     public function testItCanBeInstantiated()
     {
-        $this->assertInstanceOf(QuoteSubmitFailure::class, $this->instance);
+        $this->assertInstanceOf(\MageSuite\OrderFailureNotification\Observer\QuoteSubmitFailure::class, $this->instance);
     }
 
     public function testItImplementsObserverInterface()
     {
         $this->assertInstanceOf(\Magento\Framework\Event\ObserverInterface::class, $this->instance);
+    }
+
+    public function testItCallsNotificationOrderFailureMethodWhenNotificationIsEnabled()
+    {
+        $this->configMock
+            ->method('isNotificationEnabled')
+            ->willReturn(true);
+
+        $this->notificationMock
+            ->expects(self::once())
+            ->method('orderFailure');
+
+        $this->instance->execute($this->getObserverMock());
+    }
+
+    public function testItDoesNotCallNotificationOrderFailureMethodWhenNotificationIsDisabled()
+    {
+        $this->configMock
+            ->method('isNotificationEnabled')
+            ->willReturn(false);
+
+        $this->notificationMock
+            ->expects(self::never())
+            ->method('orderFailure');
+
+        $this->instance->execute($this->getObserverMock());
     }
 }

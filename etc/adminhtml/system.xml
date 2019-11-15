@@ -10,7 +10,7 @@
             <resource>MageSuite_OrderFailureNotification::config_failure_notifcation</resource>
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General</label>
-                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1">
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1">
                     <label>Enable notifications for order failures</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
@@ -18,7 +18,7 @@
                     <label>E-mail address</label>
                     <comment>Multiple e-mail addresses shall be separated with coma</comment>
                     <depends>
-                        <field id="enable">1</field>
+                        <field id="enabled">1</field>
                     </depends>
                 </field>
             </group>

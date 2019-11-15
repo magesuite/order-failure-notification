@@ -4,81 +4,40 @@ namespace MageSuite\OrderFailureNotification\Observer;
 
 class QuoteSubmitFailure implements \Magento\Framework\Event\ObserverInterface
 {
-    const EMAIL_TEMPLATE = 'order_failure_notification_email_template';
-    const XML_PATH_NOTIFICATION_ENABLED = 'order_failure_notification/general/enabled';
-    const XML_PATH_NOTIFICATION_EMAIL_ADDRESS = 'order_failure_notification/general/email_address';
+    /**
+     * @var \MageSuite\OrderFailureNotification\Service\ConfigProviderInterface
+     */
+    protected $config;
 
     /**
-     * @var \Magento\Framework\Mail\Template\TransportBuilder
+     * @var \MageSuite\OrderFailureNotification\Service\NotificationInterface
      */
-    private $transportBuilder;
+    protected $notification;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @param \MageSuite\OrderFailureNotification\Service\ConfigProviderInterface $config
+     * @param \MageSuite\OrderFailureNotification\Service\NotificationInterface $notification
      */
-    private $scopeConfig;
-
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
-
     public function __construct(
-        \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Psr\Log\LoggerInterface $logger
+        \MageSuite\OrderFailureNotification\Service\ConfigProviderInterface $config,
+        \MageSuite\OrderFailureNotification\Service\NotificationInterface $notification
     ) {
-        $this->transportBuilder = $transportBuilder;
-        $this->scopeConfig = $scopeConfig;
-        $this->storeManager = $storeManager;
-        $this->logger = $logger;
-    }
-
-    private function getStoreId()
-    {
-        return $this->storeManager->getStore()->getId();
+        $this->config = $config;
+        $this->notification = $notification;
     }
 
     /**
      * @param \Magento\Framework\Event\Observer $observer
-     * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\MailException
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if ($this->scopeConfig->getValue(self::XML_PATH_NOTIFICATION_ENABLED)) {
-            try {
-                $recipients = explode(',', $this->scopeConfig->getValue(self::XML_PATH_NOTIFICATION_EMAIL_ADDRESS));
-
-                $transport = $this->transportBuilder->setTemplateIdentifier(self::EMAIL_TEMPLATE)
-                    ->setTemplateOptions(
-                        [
-                            'area' => \Magento\Framework\App\Area::AREA_ADMINHTML,
-                            'store' => $this->getStoreId()
-                        ]
-                    )
-                    ->setTemplateVars(
-                        [
-                            'quote' => $observer->getEvent()->getQuote(),
-                            'order' => $observer->getEvent()->getOrder(),
-                            'exception' => $observer->getEvent()->getException()
-                        ]
-                    )
-                    ->setFromByScope('general', $this->getStoreId())
-                    ->addTo($recipients)
-                    ->getTransport();
-
-                $transport->sendMessage();
-            } catch (\Exception $exception) {
-                $this->logger->warning($exception);
-            }
+        if ($this->config->isNotificationEnabled()) {
+            $this->notification->orderFailure(
+                $this->config->getNotificationRecipients(),
+                $observer->getEvent()->getException(),
+                $observer->getEvent()->getQuote(),
+                $observer->getEvent()->getOrder()
+            );
         }
     }
 }

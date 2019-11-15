@@ -10,17 +10,17 @@ class QuoteSubmitFailureTest extends \PHPUnit\Framework\TestCase
     /**
      * @var \Magento\TestFramework\ObjectManager
      */
-    private $objectManager;
+    protected $objectManager;
 
     /**
      * @var \Magento\Framework\Event\ConfigInterface
      */
-    private $eventConfig;
+    protected $eventConfig;
 
     /**
      * @var \Magento\Framework\Event\ManagerInterface
      */
-    private $eventManager;
+    protected $eventManager;
 
     protected function setUp()
     {
