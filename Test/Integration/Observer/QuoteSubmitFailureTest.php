@@ -22,7 +22,7 @@ class QuoteSubmitFailureTest extends \PHPUnit\Framework\TestCase
      */
     protected $eventManager;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->objectManager = \Magento\TestFramework\ObjectManager::getInstance();
         $this->eventConfig = $this->objectManager->create(\Magento\Framework\Event\ConfigInterface::class);
