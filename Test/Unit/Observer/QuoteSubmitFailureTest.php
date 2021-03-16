@@ -19,7 +19,7 @@ class QuoteSubmitFailureTest extends \PHPUnit\Framework\TestCase
      */
     protected $notificationMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->configMock = $this->getMockBuilder(
             \MageSuite\OrderFailureNotification\Service\ConfigProviderInterface::class

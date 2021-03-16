@@ -14,7 +14,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
      */
     protected $scopeConfigMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->scopeConfigMock = $this->getMockBuilder(\Magento\Framework\App\Config\ScopeConfigInterface::class)
             ->getMock();
@@ -47,7 +47,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
             ->willReturn($notificationEnabled);
 
         $callResult = $this->instance->isNotificationEnabled();
-        $this->assertInternalType('bool', $callResult);
+        $this->assertIsTypeBool($callResult);
         $this->assertEquals($notificationEnabled, $callResult);
     }
 
@@ -64,8 +64,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
             ->willReturn($rawConfigValue);
 
         $callResult = $this->instance->getNotificationRecipients();
-
-        $this->assertInternalType('array', $callResult);
+        $this->assertIsTypeArray($callResult);
         $this->assertEquals($expectedResult, $callResult);
     }
 
@@ -93,5 +92,23 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
             ['john.doe@example.com, jan.kowalski@example.com', ['john.doe@example.com', 'jan.kowalski@example.com']],
             ['john.doe@example.com,jan.kowalski@example.com', ['john.doe@example.com', 'jan.kowalski@example.com']],
         ];
+    }
+
+    private function assertIsTypeBool($value)
+    {
+        if (method_exists($this, 'assertInternalType')) {
+            return $this->assertInternalType('bool', $value);
+        }
+
+        return $this->assertIsBool($value);
+    }
+
+    private function assertIsTypeArray($value)
+    {
+        if (method_exists($this, 'assertInternalType')) {
+            return $this->assertInternalType('array', $value);
+        }
+
+        return $this->assertIsArray($value);
     }
 }
