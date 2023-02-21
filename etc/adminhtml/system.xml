@@ -16,7 +16,7 @@
                 </field>
                 <field id="email_address" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>E-mail address</label>
-                    <comment>Multiple e-mail addresses shall be separated with coma</comment>
+                    <comment>Multiple e-mail addresses shall be separated with comma</comment>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
